@@ -49,6 +49,8 @@ type SalesValue = {
       price: string ;
       nft: string  | undefined;
       block_time: string  | undefined;
+	  new_owner: string;
+	  prev_owner: string;
 }
     
 type OneRank = {
@@ -96,7 +98,7 @@ async function fetchData() {
 	
 	let queryStr=""
 	for (let page = 0; page < needed_queries; page++) {
-	  queryStr+= `q${page}: transactions( account_state_state_init_code_has_get_sale_data: 1 parsed_seller_is_closed: 1 workchain: 0 page_size: ${page_size} page: ${page}) { collection: parsed_seller_nft_collection_address_address price: parsed_seller_nft_price nft: parsed_seller_nft_address_address block_time:gen_utime}` +`\n`
+	  queryStr+= `q${page}: transactions( account_state_state_init_code_has_get_sale_data: 1 parsed_seller_is_closed: 1 workchain: 0 page_size: ${page_size} page: ${page}) { collection: parsed_seller_nft_collection_address_address price: parsed_seller_nft_price nft: parsed_seller_nft_address_address block_time:gen_utime new_owner: parsed_seller_nft_new_owner_address_address prev_owner: parsed_seller_nft_prev_owner_address_address}` +`\n`
 	}
 	
 	const query = gql`query {`+queryStr+`}`
@@ -115,7 +117,10 @@ async function fetchData() {
     //console.log(value)
 		for (let index in values) {
 			if (values[index].collection != null) {
-				sales_arr.push(values[index]);
+				// Убираем wash trade
+				if(values[index].new_owner != values[index].prev_owner && values[index].new_owner != null && values[index].prev_owner != null) { 
+					sales_arr.push(values[index]);
+				}
 			}
 		
 			
@@ -125,7 +130,7 @@ async function fetchData() {
 	
 	}
 	
-	console.log(sales_arr.length)
+	console.log("Sales Count",sales_arr.length)
 	// Преобразовываем данные
 	//for (let i in sales_arr) {
 	//	console.log(sales_arr[i].collection)
