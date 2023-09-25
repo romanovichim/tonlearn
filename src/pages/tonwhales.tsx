@@ -35,6 +35,8 @@ type Account = {
   
   type richArr = OneRich[];
 
+
+// Fixed-> toStrin,then separations  
 function numberWithCommas(x: Number) {
     var parts = x.toFixed(2).split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
