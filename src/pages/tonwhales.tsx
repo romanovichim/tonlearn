@@ -35,6 +35,11 @@ type Account = {
   
   type richArr = OneRich[];
 
+function numberWithCommas(x: Number) {
+    var parts = x.toFixed(2).split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+}
 
 async function fetchData() {
     const endpoint = 'https://dton.io/graphql/'
@@ -169,7 +174,7 @@ const TonCoinWhales = () => {
         <tr>
         <td>{index+1}</td>
         <td><a href={"https://tonscan.org/address/"+row.address_friendly} target="_blank" rel="noopener noreferrer"> {row.name ? row.name  : (row.address_friendly.substring(0,4)+"..."+row.address_friendly.substring(row.address_friendly.length - 5,row.address_friendly.length))}</a></td>
-        <td>{(Number(row.balance)/1000000000).toFixed(2)} TON</td>
+        <td>{numberWithCommas(Number(row.balance)/1000000000)} TON</td>
        </tr>
   
         
