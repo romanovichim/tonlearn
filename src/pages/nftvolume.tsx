@@ -73,12 +73,12 @@ type richArr = OneRich[];
 
 async function fetchData() {
 	const endpoint = 'https://dton.io/graphql/'
-	//
+	// cut account_state_state_init_code_has_get_sale_data: 1 + noise but less sales cut
 	const query_day_sales = gql`
 	query {
 		lastTransactionCountSegments(
 			segmentation: "hour"
-			account_state_state_init_code_has_get_sale_data: 1
+
 			parsed_seller_is_closed: 1
 			page_size: 24
 		) { cnt segment}
@@ -98,7 +98,7 @@ async function fetchData() {
 	
 	let queryStr=""
 	for (let page = 0; page < needed_queries; page++) {
-	  queryStr+= `q${page}: transactions( account_state_state_init_code_has_get_sale_data: 1 parsed_seller_is_closed: 1 workchain: 0 page_size: ${page_size} page: ${page}) { collection: parsed_seller_nft_collection_address_address price: parsed_seller_nft_price nft: parsed_seller_nft_address_address block_time:gen_utime new_owner: parsed_seller_nft_new_owner_address_address prev_owner: parsed_seller_nft_prev_owner_address_address}` +`\n`
+	  queryStr+= `q${page}: transactions( parsed_seller_is_closed: 1 workchain: 0 page_size: ${page_size} page: ${page}) { collection: parsed_seller_nft_collection_address_address price: parsed_seller_nft_price nft: parsed_seller_nft_address_address block_time:gen_utime new_owner: parsed_seller_nft_new_owner_address_address prev_owner: parsed_seller_nft_prev_owner_address_address}` +`\n`
 	}
 	
 	const query = gql`query {`+queryStr+`}`
