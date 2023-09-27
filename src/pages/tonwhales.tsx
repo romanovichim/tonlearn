@@ -96,7 +96,7 @@ async function fetchData() {
     for (var row of data.account_states) {
         //friendly address
         let temp_name = undefined as string  | undefined; 
-        let temp_addr =  Address.parseRaw('0:'+row.address).toString({ urlSafe: false });
+        let temp_addr =  Address.parseRaw('0:'+row.address).toString({ urlSafe: true });
         for (var acc of acc_list) {
             if('0:'+row.address.toLowerCase() === acc.address){
                 temp_name = acc.name
