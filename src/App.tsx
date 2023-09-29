@@ -7,6 +7,9 @@ import { Routes, Route, Outlet, Link } from "react-router-dom";
 // Pages
 import NftSalesVolume from './pages/nftvolume'
 import TonCoinWhales from './pages/tonwhales'
+import WhaleDuRove  from './pages/w_durove'
+
+
 
 function App() {
 
@@ -19,6 +22,7 @@ function App() {
           <Route index element={<Home />} />
           <Route path="ton-nft-sales-volume" element={<NftSalesVolume />} />
           <Route path="ton-toncoin-whales" element={<TonCoinWhales />} />
+          <Route path="pavel-durov-telegram-usernames" element={<WhaleDuRove />} />
           {/* Using path="*"" means "match anything", so this route
                 acts like a catch-all for URLs that we don't have explicit
                 routes for. */}
@@ -44,6 +48,7 @@ function Layout() {
           <Nav className="me-auto">
           <Nav.Link><Link to="/ton-nft-sales-volume" style={{ textDecoration: 'none' }}>Nft Sales Volume</Link></Nav.Link>
           <Nav.Link><Link to="/ton-toncoin-whales" style={{ textDecoration: 'none' }}>Toncoin Whales</Link></Nav.Link>
+          <Nav.Link><Link to="/pavel-durov-telegram-usernames" style={{ textDecoration: 'none' }}>Durov Usernames</Link></Nav.Link>
           </Nav>
       </Container>
     </Navbar>
