@@ -219,6 +219,7 @@ const NftSalesVolume = () => {
 		<p style={{ fontSize: "30px", fontWeight: "190"  }} className="text-white">Loading data...</p>
 		<Spinner animation="border" role="status" variant="primary">
 		<span className="visually-hidden">Loading...</span>
+		<p className="text-secondary">tonlearn - Live Analytics Platform, so wait 20 seconds and the data will appear</p>
 		</Spinner>
 	  </Container>
 	</div>
