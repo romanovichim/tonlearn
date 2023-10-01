@@ -172,7 +172,7 @@ const WhaleDuRove = () => {
           <tr>
             <th>Date</th>
             <th>Telegram Username</th>
-            <th>Purchase price</th>
+            <th>Purchase price, TON</th>
           </tr>
         </thead>
         <tbody>

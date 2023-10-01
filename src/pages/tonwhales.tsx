@@ -31,12 +31,24 @@ type Account = {
       address_friendly: string;
       balance: string;
       name: string  | undefined;
+      percentage_total: string;
+      percentage_circulating: string;
   }
   
   type richArr = OneRich[];
 
+  type OneStatus = {
+    date: string;
+    timestamp: number;
+    total_accounts: number;
+    total_supply: string;
+    circulating_supply: string;
+    initiated_supply: string;
+  }
 
-// Fixed-> toStrin,then separations  
+  type statusArr = OneStatus[];
+
+
 function numberWithCommas(x: Number) {
     var parts = x.toFixed(2).split(".");
     parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
@@ -83,7 +95,21 @@ async function fetchData() {
     //for (var acc of acc_list) {
     //	 console.log(acc.address)
     //}
+// достаем китов
+		
+    const responseTech = await fetch('https://tontech.io/api/status', {
+      method: 'GET',
+      headers: {
+      Accept: 'application/json',
+      },
+    });
 
+    if (!responseTech.ok) {
+      throw new Error(`Error! status: ${responseTech.status}`);
+    }
+    //console.log(await responseTech.json() as statusArr);
+      const supply_list = (await responseTech.json()) as statusArr;
+    var last_supply = supply_list[supply_list.length-1];
     // enrich
     var rich_arr=[] as richArr;
     //for (let row in data.account_states) {
@@ -96,14 +122,18 @@ async function fetchData() {
     for (var row of data.account_states) {
         //friendly address
         let temp_name = undefined as string  | undefined; 
-        let temp_addr =  Address.parseRaw('0:'+row.address).toString({ urlSafe: true });
+        let temp_addr =  Address.parseRaw('0:'+row.address).toString({ urlSafe: false });
+
+        let percentage_total_t = ((Number(row.balance)/Number(last_supply['total_supply'])) * 100 ).toFixed(2)+" %"
+        let percentage_circulating_t = ((Number(row.balance)/Number(last_supply['circulating_supply'])) * 100 ).toFixed(2)+" %"
+
         for (var acc of acc_list) {
             if('0:'+row.address.toLowerCase() === acc.address){
                 temp_name = acc.name
                 //console.log(acc.name);
             } 
         }
-        rich_arr.push({address_friendly: temp_addr,balance: row.balance,name: temp_name} as OneRich);
+        rich_arr.push({address_friendly: temp_addr,balance: row.balance,name: temp_name,percentage_total: percentage_total_t,percentage_circulating: percentage_circulating_t} as OneRich);
     }
 
     return rich_arr
@@ -177,6 +207,8 @@ const TonCoinWhales = () => {
         <td>{index+1}</td>
         <td><a href={"https://tonscan.org/address/"+row.address_friendly} target="_blank" rel="noopener noreferrer"> {row.name ? row.name  : (row.address_friendly.substring(0,4)+"..."+row.address_friendly.substring(row.address_friendly.length - 5,row.address_friendly.length))}</a></td>
         <td>{numberWithCommas(Number(row.balance)/1000000000)} TON</td>
+        <td>{row.percentage_total}</td>
+        <td>{row.percentage_circulating}</td>
        </tr>
   
         
@@ -188,12 +220,15 @@ const TonCoinWhales = () => {
       <Container>
       <h2 className="text-white">Top Accounts by TON Balance </h2>
       <p className="text-secondary">Richest TON accounts by balance</p>
+      <p className="text-secondary">Read about total and Circulating supply <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a></p>
       <Table striped bordered hover variant="dark">
       <thead>
           <tr>
             <th>#</th>
             <th>Whale</th>
             <th>TON Balance</th>
+            <th>From Total Supply</th>
+            <th>From Circulating Supply</th>
           </tr>
         </thead>
         <tbody>
