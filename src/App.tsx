@@ -1,6 +1,6 @@
 
 import './App.css'
-import { Col, Container, Nav, Navbar, Row} from 'react-bootstrap'
+import { Container, Nav, Navbar} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Routes, Route, Outlet, Link, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
