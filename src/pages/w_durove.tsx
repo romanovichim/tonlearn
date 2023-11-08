@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { request, gql } from 'graphql-request'
 
 import { Address } from 'ton-core';
-import { Container, Table } from "react-bootstrap";
+import { Alert, Container, Table } from "react-bootstrap";
 import Spinner from 'react-bootstrap/Spinner';
 
 type OneTx = {
