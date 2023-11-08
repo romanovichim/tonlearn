@@ -49,10 +49,15 @@ function Layout() {
       <Container>
       <Navbar.Brand href="/">Ton Learn</Navbar.Brand>
           <Nav className="me-auto">
-          <Nav.Link><Link to="/ton-nft-sales-volume" style={{ textDecoration: 'none' }}>Nft Sales Volume</Link></Nav.Link>
-          <Nav.Link><Link to="/ton-toncoin-whales" style={{ textDecoration: 'none' }}>Toncoin Whales</Link></Nav.Link>
-          <Nav.Link><Link to="/pavel-durov-telegram-usernames" style={{ textDecoration: 'none' }}>Durov Usernames</Link></Nav.Link>
+          <NavDropdown title="Explore TON NFT" id="collapsible-nav-dropdown1">
+              <NavDropdown.Item><Link to="/ton-nft-sales-volume" style={{ textDecoration: 'none' }}>Nft Sales Volume</Link></NavDropdown.Item>
+            </NavDropdown>
+            <NavDropdown title="Explore TON Whales" id="collapsible-nav-dropdown2">
+              <NavDropdown.Item><Link to="/ton-toncoin-whales" style={{ textDecoration: 'none' }}>Toncoin Whales</Link></NavDropdown.Item>
+              <NavDropdown.Item><Link to="/pavel-durov-telegram-usernames" style={{ textDecoration: 'none' }}>Durov Usernames</Link></NavDropdown.Item>
+            </NavDropdown>
           </Nav>
+          
       </Container>
     </Navbar>
 

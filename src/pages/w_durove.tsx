@@ -122,15 +122,20 @@ const WhaleDuRove = () => {
     //console.log(loading);
     // return a Spinner when loading is true
     if(loading) return (
+      <>
+        <Alert key='danger' variant='danger'>
+        This product uses dton.io to obtain data. At the moment, dton.io is moving to new servers and therefore the functionality may not work. For now, join the 
+          <Alert.Link href="https://t.me/ton_learn"> community</Alert.Link>.
+        </Alert>
       <div className="vh-100 bg-dark">
           <Container fluid className="py-4 text-center" data-bs-theme="dark">
           <p style={{ fontSize: "30px", fontWeight: "190"  }} className="text-white">Loading data...</p>
           <Spinner animation="border" role="status" variant="primary">
           <span className="visually-hidden">Loading...</span>
           </Spinner>
-          <p className="text-secondary">tonlearn - Live Analytics Platform, so wait 20 seconds and the data will appear</p>
         </Container>
       </div>
+      </>
   
     );
   
