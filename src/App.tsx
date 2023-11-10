@@ -1,6 +1,6 @@
 
 import './App.css'
-import { Badge, Container, Nav, NavDropdown, Navbar} from 'react-bootstrap'
+import { Container, Nav, NavDropdown, Navbar} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Routes, Route, Outlet, Link, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
@@ -110,7 +110,7 @@ function Home() {
     <div className="vh-100 bg-dark">
     <Container fluid className="py-4 text-center" data-bs-theme="dark">
     <br />
-  <p style={{ fontSize: "30px", fontWeight: "600"  }} className="text-white">TON PnL Analyzer<Badge pill bg="info">Beta</Badge></p>
+  <p style={{ fontSize: "30px", fontWeight: "600"  }} className="text-white">TON PnL Analyzer</p>
   <p style={{ fontSize: "25px", fontWeight: "190"  }} className="text-white"> Use our Address Analyzer to quickly visualize the PnL (profit and loss)<br />and Trading History of your wallet address!</p>
   <br /> 
   <p className="text-secondary">Integrated over StoneFi for now!</p>
