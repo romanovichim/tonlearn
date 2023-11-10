@@ -1,6 +1,6 @@
 
 import './App.css'
-import { Container, Nav, NavDropdown, Navbar} from 'react-bootstrap'
+import { Badge, Container, Nav, NavDropdown, Navbar} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Routes, Route, Outlet, Link, useNavigate } from "react-router-dom";
 import Button from 'react-bootstrap/Button';
@@ -12,6 +12,13 @@ import TonCoinWhales from './pages/tonwhales'
 import WhaleDuRove  from './pages/w_durove'
 //PnL Page
 import SinglePnL from './pages/singlepnl'
+//PnL Pages
+import PnLDashThirty  from './pages/pnl30dashboard'
+import PnLDashSeven  from './pages/pnl7dashboard'
+import PnLDashOne  from './pages/pnl1dashboard'
+
+
+
 
 function App() {
 
@@ -26,6 +33,9 @@ function App() {
           <Route path="ton-nft-sales-volume" element={<NftSalesVolume />} />
           <Route path="ton-toncoin-whales" element={<TonCoinWhales />} />
           <Route path="pavel-durov-telegram-usernames" element={<WhaleDuRove />} />
+          <Route path="ton-best-traders" element={<PnLDashThirty/>} />
+          <Route path="ton-best-traders-weekly" element={<PnLDashSeven/>} />
+          <Route path="ton-best-traders-daily" element={<PnLDashOne/>} />
           {/* Using path="*"" means "match anything", so this route
                 acts like a catch-all for URLs that we don't have explicit
                 routes for. */}
@@ -56,6 +66,7 @@ function Layout() {
               <NavDropdown.Item><Link to="/ton-toncoin-whales" style={{ textDecoration: 'none' }}>Toncoin Whales</Link></NavDropdown.Item>
               <NavDropdown.Item><Link to="/pavel-durov-telegram-usernames" style={{ textDecoration: 'none' }}>Durov Usernames</Link></NavDropdown.Item>
             </NavDropdown>
+            <Nav.Link><Link to="/ton-best-traders" style={{ textDecoration: 'none' }}>Top TON Traders</Link></Nav.Link>
           </Nav>
           
       </Container>
@@ -99,7 +110,7 @@ function Home() {
     <div className="vh-100 bg-dark">
     <Container fluid className="py-4 text-center" data-bs-theme="dark">
     <br />
-  <p style={{ fontSize: "30px", fontWeight: "600"  }} className="text-white">TON PnL Analyzer</p>
+  <p style={{ fontSize: "30px", fontWeight: "600"  }} className="text-white">TON PnL Analyzer<Badge pill bg="info">Beta</Badge></p>
   <p style={{ fontSize: "25px", fontWeight: "190"  }} className="text-white"> Use our Address Analyzer to quickly visualize the PnL (profit and loss)<br />and Trading History of your wallet address!</p>
   <br /> 
   <p className="text-secondary">Integrated over StoneFi for now!</p>
