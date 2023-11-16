@@ -18,6 +18,8 @@ import PnLDashSeven  from './pages/pnl7dashboard'
 import PnLDashOne  from './pages/pnl1dashboard'
 
 
+//Jetton
+import JettonDashboard from './pages/jettondash'
 
 
 function App() {
@@ -36,6 +38,7 @@ function App() {
           <Route path="ton-best-traders" element={<PnLDashThirty/>} />
           <Route path="ton-best-traders-weekly" element={<PnLDashSeven/>} />
           <Route path="ton-best-traders-daily" element={<PnLDashOne/>} />
+          <Route path="jetton-dash" element={<JettonDashboard/>} />
           {/* Using path="*"" means "match anything", so this route
                 acts like a catch-all for URLs that we don't have explicit
                 routes for. */}
@@ -66,7 +69,10 @@ function Layout() {
               <NavDropdown.Item><Link to="/ton-toncoin-whales" style={{ textDecoration: 'none' }}>Toncoin Whales</Link></NavDropdown.Item>
               <NavDropdown.Item><Link to="/pavel-durov-telegram-usernames" style={{ textDecoration: 'none' }}>Durov Usernames</Link></NavDropdown.Item>
             </NavDropdown>
-            <Nav.Link><Link to="/ton-best-traders" style={{ textDecoration: 'none' }}>Top TON Traders</Link></Nav.Link>
+            <NavDropdown title="Explore Jettons" id="collapsible-nav-dropdown2">
+              <NavDropdown.Item><Link to="/jetton-dash" style={{ textDecoration: 'none' }}>Jetton Ranking</Link></NavDropdown.Item>
+              <NavDropdown.Item><Link to="/ton-best-traders" style={{ textDecoration: 'none' }}>Top TON Traders</Link></NavDropdown.Item>
+            </NavDropdown>
           </Nav>
           
       </Container>

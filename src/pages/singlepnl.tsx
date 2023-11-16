@@ -427,7 +427,7 @@ const SinglePnL = () => {
         <Col>{total_realised_pnl}</Col>
         <Col><h3 className="text-white"> TON</h3></Col>
       </Row> 
-      <p className="text-secondary">Accounted Exchanges: StoneFi</p>
+      <p className="text-secondary">Accounted Exchanges: Ston.fi</p>
       <p className="text-secondary">Read about Realised PnL <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a></p>
      
       </Container>
