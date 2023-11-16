@@ -141,9 +141,9 @@ async function fetchData() {
 
 		for (const token of jsonData) {
 			let approved: string = "parsed_jetton_wallet_data_is_approved: 1";
-			if (token.address === "0:9DA73E90849B43B66DACF7E92B576CA0978E4FC25F8A249095D7E5EB3FE5EEBB") {
-				approved = "";
-			}
+			//if (token.address === "0:9DA73E90849B43B66DACF7E92B576CA0978E4FC25F8A249095D7E5EB3FE5EEBB") {
+			//	approved = "";
+			//}
 			
 			const template: string = `
 			seq${token.address.slice(2)}: account_states(
@@ -317,7 +317,7 @@ const JettonDashboard = () => {
         <React.Fragment>
         <tr  onClick={onClickHandler}>
         <td>{index+1}</td>
-        <td>{row.name}</td>
+        <td><a style={{ textDecoration: 'none' }} href={'https://tonscan.org/address/'+row.jm_address} target="_blank" rel="noopener noreferrer">{row.name}</a></td>
         <td>{row.txes_30_days}</td>
         <td>{row.txes_7_days}</td>
         <td>{row.txes_24_hours}</td>
