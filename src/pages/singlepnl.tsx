@@ -8,251 +8,354 @@ import Spinner from 'react-bootstrap/Spinner';
 import Image from 'react-bootstrap/Image';
 import React from "react";
 
-type ApiResponse = {
-    operations: {
-    operation: Operation;
-    asset0_info: AssetInfo;
-    asset1_info: AssetInfo;
-    }[];
+type Asset = {
+  master_address: string;
+  name: string;
+  symbol: string;
+  image_url: string;
+  decimal: number;
+  }
+  
+  type ddAsset = {
+  type: string;
+  address: string | undefined;
+  };
+  
+  type OutputItem = {
+  pool: string;
+  assetIn: ddAsset;
+  assetOut: ddAsset;
+  amountIn: string;
+  amountOut: string;
+  lt: string;
+  createdAt: string;
+  };
+  
+  type Transaction = {
+  type: string;
+  token_jm: string;
+  token: number;
+  TON: number;
+  swap_timestamp: number;
+  exchange_name: string;
+  };
+  
+  type AdapterResult = {
+  assets: Asset[];
+  txes: Transaction[];
+  }
+  
+  //For stonfi response
+  
+  type sfResponse = {
+  operations: {
+  operation: Operation;
+  asset0_info: AssetInfo;
+  asset1_info: AssetInfo;
+  }[];
+  }
+  
+  type Operation = {
+    pool_tx_hash: string;
+      pool_address: string;
+      router_address: string;
+      pool_tx_lt: number;
+      pool_tx_timestamp: string;
+      destination_wallet_address: string;
+      operation_type: string;
+      success: boolean,
+      exit_code: string;
+      asset0_address: string;
+      asset0_amount: string;
+      asset0_delta: string;
+      asset0_reserve: string;
+      asset1_address: string;
+      asset1_amount: string;
+      asset1_delta: string;
+      asset1_reserve: string;
+      lp_token_delta: string;
+      lp_token_supply: string;
+      fee_asset_address: string;
+      lp_fee_amount: string;
+      protocol_fee_amount: string;
+      referral_fee_amount: string;
+      referral_address: string  | undefined;
+      wallet_address: string;
+      wallet_tx_lt: string;
+      wallet_tx_hash: string;
+      wallet_tx_timestamp: string;
+  }
+  
+  type AssetInfo = {
+    contract_address: string;
+    "symbol": string;
+    display_name: string;
+    image_url: string;
+    decimals: number;
+    kind: string;
+    deprecated: boolean;
+    community: boolean;
+    blacklisted: boolean;
+    default_symbol: boolean;
+  }
+  
+  //type AssetArr = AssetInfo[];
+  
+  type TokenPNL ={
+    realised_profit: number;
+    roi: string;
+    token_info: Asset;
+    txes: Transaction[];
+  }
+  
+  type Result = {
+    addr_str: string;
+    total_pnl: number;
+    details: TokenPNL[];
+  }
+  
+
+
+  
+  //async function dedustAssets(): Promise {
+  async function dedustAssets(): Promise<Asset[]> {
+    const response = await fetch('https://api.dedust.io/v2/assets');
+    const data = await response.json();
+    const ddAssetTempList: Asset[] = [];
+  
+    for (const item of data) {
+    if (item.type === 'jetton') {
+    const ddAssetTempDict: Asset = {
+    master_address: item.address,
+    name: item.name,
+    symbol: item.symbol,
+    image_url: item.image,
+    decimal: item.decimals
+    };
+    ddAssetTempList.push(ddAssetTempDict);
     }
-    
-    type Operation = {
-        pool_tx_hash: string;
-        pool_address: string;
-        router_address: string;
-        pool_tx_lt: number;
-        pool_tx_timestamp: string;
-        destination_wallet_address: string;
-        operation_type: string;
-        success: boolean,
-        exit_code: string;
-        asset0_address: string;
-        asset0_amount: string;
-        asset0_delta: string;
-        asset0_reserve: string;
-        asset1_address: string;
-        asset1_amount: string;
-        asset1_delta: string;
-        asset1_reserve: string;
-        lp_token_delta: string;
-        lp_token_supply: string;
-        fee_asset_address: string;
-        lp_fee_amount: string;
-        protocol_fee_amount: string;
-        referral_fee_amount: string;
-        referral_address: string  | undefined;
-        wallet_address: string;
-        wallet_tx_lt: string;
-        wallet_tx_hash: string;
-        wallet_tx_timestamp: string;
     }
+  
+  return ddAssetTempList;
+  }
+  
+  function findDdAsset(masterAddr: string, ddAssetsList: Asset[]): Asset | null {
+  return ddAssetsList.find(item => item.master_address === masterAddr) || null;
+  }
+  
+  function getDate(timestamp: number): Date {
+    return new Date(timestamp * 1000);
+  }
+
+
+  //async function dedustAdapter(addrStr: string): Promise {
+  async function dedustAdapter(addrStr: string): Promise<AdapterResult> {
+  const responsedd = await fetch(`https://api.dedust.io/v2/accounts/${addrStr}/trades`); //Cors error
+  //const responsedd = await fetch(`http://api.dedust.io/v2/accounts/${addrStr}/trades`,{ mode: 'no-cors'});
+  console.log(responsedd);
+  const datadd = await responsedd.json() as OutputItem[];
+  const ddAssetsList = await dedustAssets() as Asset[];
+  const notUniqueAssets: Asset[] = [];
+  const ddTxesList: Transaction[] = [];
+  
+  for (const item of datadd) {
+  if (item.assetIn.type === "native") {
+  const tempDdAsset = findDdAsset(item.assetOut.address!, ddAssetsList);
+  if (tempDdAsset !== null) {
+  const tempDdTx = {
+  type: 'BUY',
+  token_jm: item.assetOut.address!,
+  token: Number(item.amountOut) / (10 ** tempDdAsset.decimal),
+  TON: Number(item.amountIn) / (10 ** 9),
+  swap_timestamp: Math.round(new Date(item.createdAt).getTime() / 1000),
+  exchange_name: 'dedust.io'
+  };
+  ddTxesList.push(tempDdTx);
+  notUniqueAssets.push(tempDdAsset);
+  }
+  }
+  }
+  
+  for (const item of datadd) {
+  if (item.assetOut.type === "native") {
+  const tempDdAsset = findDdAsset(item.assetIn.address!, ddAssetsList);
+  if (tempDdAsset !== null) {
+  const tempDdTx = {
+  type: 'SELL',
+  token_jm: item.assetIn.address!,
+  token: Number(item.amountIn) / (10 ** tempDdAsset.decimal),
+  TON: Number(item.amountOut) / (10 ** 9),
+  swap_timestamp: Math.round(new Date(item.createdAt).getTime() / 1000),
+  exchange_name: 'dedust.io'
+  };
+  ddTxesList.push(tempDdTx);
+  notUniqueAssets.push(tempDdAsset);
+  }
+  }
+  }
+  
+  const ddUniqueAssets = Object.values(notUniqueAssets.reduce((acc, cur) => Object.assign(acc, { [cur.master_address]: cur }), {})) as Asset[];
+  
+  return { assets: ddUniqueAssets, txes: ddTxesList };
+  
+  }
+  
+    // for time
     
-    type AssetInfo = {
-        contract_address: string;
-        "symbol": string;
-        display_name: string;
-        image_url: string;
-        decimals: number;
-        kind: string;
-        deprecated: boolean;
-        community: boolean;
-        blacklisted: boolean;
-        default_symbol: boolean;
+
+  
+  async function stonfiAdapter(addrStr: string): Promise<AdapterResult>{ 
+  const payload = { since: '2021-01-01T12:34:56', until: '2050-11-02T23:59:59', op_type: 'Swap' };
+  const queryParams = new URLSearchParams(payload).toString();
+  const url = `https://api.ston.fi/v1/wallets/${addrStr}/operations?${queryParams}`;
+  const sfresponse = await fetch(url);
+  const sfData = await sfresponse.json() as sfResponse;
+  const sfNotUniqueAssets: Asset[] = [];
+  const sfTxesList: Transaction[] = [];
+  
+  for (const row of sfData['operations']) {
+  
+  const tempSFTx = {} as Transaction;
+  
+  if (row['operation']['asset1_address'] === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez') {
+    if (row['operation']['fee_asset_address'] === "EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez") {
+    tempSFTx["type"] = "SELL";
+    } else {
+    tempSFTx["type"] = "BUY";
     }
-    
-    type AssetArr = AssetInfo[];
-    
-    type Tx =  {
-        "type": string;
-        token: number;
-        TON: number;
-        wallet_tx_timestamp: string;
-        hash: string;
+    tempSFTx["token_jm"] = row['operation']['asset0_address'];
+    tempSFTx["token"] = Math.abs(parseInt(row['operation']['asset0_amount'])) / 10**row['asset0_info']['decimals'];
+    tempSFTx["TON"] = Math.abs(parseInt(row['operation']['asset1_amount'])) / 10**row['asset1_info']['decimals'];
+    tempSFTx["swap_timestamp"] = Math.floor(new Date(row['operation']['wallet_tx_timestamp']).getTime() / 1000);
+    tempSFTx["exchange_name"] = 'ston.fi';
+    sfTxesList.push(tempSFTx);
+  
+    const sfAssetTempDict = {
+    "master_address": row['asset0_info']['contract_address'],
+    "name": row['asset0_info']['display_name'],
+    "symbol": row['asset0_info']['symbol'],
+    "image_url": row['asset0_info']['image_url'],
+    "decimal": row['asset0_info']['decimals']
+    };
+    sfNotUniqueAssets.push(sfAssetTempDict);
+  
+  }
+  
+  
+  if (row['operation']['asset0_address'] === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez') {
+    if (row['operation']['fee_asset_address'] === "EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez") {
+    tempSFTx["type"] = "SELL";
+    } else {
+    tempSFTx["type"] = "BUY";
     }
-    
-    type ResItem = {
-        token_info: AssetInfo;
-        txes: Tx[];
-        realised_profit: number;
-        roi: number;
-    }
-    
-    type ResultArr = ResItem[];
-    
-    
-    type frontRes = {
-        addr_str: string;
-        total_pnl: number;
-        details: ResultArr; 
-        realised_profit: number;
-        roi: number;
-    }
+    tempSFTx["token_jm"] = row["operation"]["asset1_address"];
+  
+    tempSFTx["token"] = Math.abs(parseInt(row['operation']['asset1_amount'])) / Math.pow(10, row['asset1_info']['decimals']);
+    tempSFTx["TON"] = Math.abs(parseInt(row['operation']['asset1_amount'])) / Math.pow(10, row['asset1_info']['decimals']);
+    tempSFTx["swap_timestamp"] = Math.floor(new Date(row['operation']['wallet_tx_timestamp']).getTime() / 1000);
+    tempSFTx["exchange_name"] = 'ston.fi';
+    sfTxesList.push(tempSFTx);
+    const sf_asset_temp_dict = {
+    "master_address": row['asset1_info']['contract_address'],
+    "name": row['asset1_info']['display_name'],
+    "symbol": row['asset1_info']['symbol'],
+    "image_url": row['asset1_info']['image_url'],
+    "decimal": row['asset1_info']['decimals']
+    };
+    sfNotUniqueAssets.push(sf_asset_temp_dict);
+  }
+  
+  }
+  
+  const sfUniqueAssets = Object.values(sfNotUniqueAssets.reduce((acc, cur) => Object.assign(acc, { [cur.master_address]: cur }), {})) as Asset[];
+  
+  return { assets: sfUniqueAssets, txes: sfTxesList };
+  }
+  
+  function searchAllTxes(searchAddr: string, txesArr: Transaction[]): Transaction[] {
+    return txesArr.filter((t) => t.token_jm === searchAddr);
+  }
+
+
+
+
     
     
     export const countPnL = async(addr_str: string) => {
         try {
-            const payload = {
-            since: '2021-01-01T12:34:56',
-            until: '2050-11-02T23:59:59',
-            op_type: 'Swap',
-            };
-    
-            const url = new URL(`https://api.ston.fi/v1/wallets/${addr_str}/operations`);
-            Object.entries(payload).forEach(([key, value]) => {
-            url.searchParams.append(key, value);
-            });
-            
-            const response = await fetch(url.toString(), {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-              },
-            });
-            
-            if (!response.ok) {
-              //throw new Error(`Error! status: ${response.status}`);
-              //добавить отправку пустого значения
-              console.log(`Error! status: ${response.status}`);
-              return undefined;
-            }
-            
-            const responseData = (await response.json() as ApiResponse);
-    
-            if (responseData.operations.length < 1) {
-                return 'empty';
-            }
-    
-            //console.log(responseData);
-            
-            var temp_arr=[] as AssetArr;
-            
-            for (const row of responseData.operations) {
-                if (row.operation.exit_code === 'swap_ok') {
-                    if (
-                    row.asset1_info.contract_address === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez' ||
-                    row.asset0_info.contract_address === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez'
-                    ) {
-                        if (
-                        row.asset0_info.contract_address !== 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez' &&
-                        !temp_arr.includes(row.asset0_info)
-                        ) {
-                        temp_arr.push(row.asset0_info);
-                        }
-                        if (
-                        row.asset1_info.contract_address !== 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez' &&
-                        !temp_arr.includes(row.asset1_info)
-                        ) {
-                        temp_arr.push(row.asset1_info);
-                        }
-                    }
-                }
-            }
-            
-            //console.log(temp_arr);
-            //let outputArray = Array.from(new Set(temp_arr)) as AssetArr;
-            //console.log(outputArray);
-            //find distnct
-            const distinctObjects = Array.from(new Set(temp_arr.map(obj => JSON.stringify(obj))))
-            .map(jsonString => JSON.parse(jsonString)) as AssetArr;
-    
-            var result_arr=[] as ResultArr;
-            
-            //console.log(distinctObjects);
-            for (const token of distinctObjects) {
-                var res_dict = {} as ResItem;
-    
-                res_dict["token_info"] = token;
-    
-                var temp_arr2 = [] as Tx[];
-    
-                for (const row of responseData.operations) {
-                    if (
-                    (row.asset1_info.contract_address === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez' && row.asset0_info.contract_address === token.contract_address)
-                    || (row.asset0_info.contract_address === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez' && row.asset1_info.contract_address === token.contract_address)
-                    ) {
-                    var temp = {} as Tx;
-    
-                    if (row.operation.fee_asset_address === token.contract_address) {
-                        temp["type"] = "BUY";
-                    } else {
-                        temp["type"] = "SELL";
-                    }
-    
-                    // Other properties and operations for temp object
-                    if (row.asset0_info.contract_address === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez') {
-                    temp["TON"] = Math.abs(parseInt(row.operation.asset0_amount)) / Math.pow(10, row.asset0_info.decimals);
-                    } else {
-                    temp["token"] = Math.abs(parseInt(row.operation.asset0_amount)) / Math.pow(10, row.asset0_info.decimals);
-                    }
-    
-                    if (row.asset1_info.contract_address === 'EQCM3B12QK1e4yZSf8GtBRT0aLMNyEsBc_DhVfRRtOEffLez') {
-                    temp["TON"] = Math.abs(parseInt(row.operation.asset1_amount)) / Math.pow(10, row.asset1_info.decimals);
-                    } else {
-                    temp["token"] = Math.abs(parseInt(row.operation.asset1_amount)) / Math.pow(10, row.asset1_info.decimals);
-                    }
+          const take_dd = await dedustAdapter(addr_str);
+          const take_sf = await stonfiAdapter(addr_str);
+          
+          const txes_arr: Transaction[] = [];
         
-                    temp['wallet_tx_timestamp'] = row.operation.wallet_tx_timestamp;
-                    temp["hash"] = `https://tonscan.org/tx/${row.operation.wallet_tx_hash}`;
-    
-                    //
-                    temp_arr2.push(temp);
-                    }
-                }
-                res_dict["txes"] = temp_arr2;
-    
-                // Calculation
-                let sum_sell = 0;
-                for (const swap of temp_arr2) {
-                    if (swap.type === 'SELL') {
-                        sum_sell += swap.TON;
-                    }
-                }
-    
-                let sum_buy = 0;
-                for (const swap of temp_arr2) {
-                    if (swap.type === 'BUY') {
-                        sum_buy += swap.TON;
-                    }
-                }
-    
-                const Realised_profit = sum_sell - sum_buy;
-                res_dict["realised_profit"] = Realised_profit;
-    
-                let roi = 0;
-                if (sum_buy > 0) {
-                    roi = Math.round((Realised_profit / sum_buy) * 100 * 100) / 100;
-                }
-                res_dict["roi"] = roi;
-    
-                result_arr.push(res_dict);
-                
+          for (const tx1 of take_dd['txes']) {
+          txes_arr.push(tx1);
+          }
+          for (const tx2 of take_sf['txes']) {
+          txes_arr.push(tx2);
+          }
+        
+          const user_not_unique_assets: Asset[] = [];
+          for (const asset1 of take_dd['assets']) {
+          user_not_unique_assets.push(asset1);
+          }
+          for (const asset2 of take_sf['assets']) {
+          user_not_unique_assets.push(asset2);
+          }
+          
+          
+          const user_unique_assets = Object.values(user_not_unique_assets.reduce((acc, cur) => Object.assign(acc, { [cur.master_address]: cur }), {})) as Asset[];
+          
+          let details: TokenPNL[] = [];
+        
+          for (const jetton of user_unique_assets) {
+            const temp_txes = searchAllTxes(jetton.master_address, txes_arr).sort((a, b) => a.swap_timestamp - b.swap_timestamp);
+            let sum_sell = 0;
+            let sum_buy = 0;
+        
+            for (const swap of temp_txes) {
+            if (swap.type === 'SELL') {
+            sum_sell += swap.TON;
+            } else if (swap.type === 'BUY') {
+            sum_buy += swap.TON;
             }
-            //console.log(result_arr)
-            
-            var front_json = {} as frontRes;
-            front_json['addr_str'] = addr_str;
-    
-            let total_pnl = 0;
-            for (const item of result_arr) {
-                total_pnl += item['realised_profit'];
             }
-    
-            front_json['total_pnl'] = total_pnl;
-            front_json['details'] = result_arr;
-            
-            //console.log(front_json);
-            return front_json;
+        
+            const Realised_profit = sum_sell - sum_buy;
+            const roi = sum_buy > 0 ? ((Realised_profit / sum_buy) * 100).toFixed(2) : "0";
+        
+            const tt_details_dict = {
+            realised_profit: Realised_profit,
+            roi: roi,
+            token_info: jetton,
+            txes: temp_txes
+            };
+        
+            details.push(tt_details_dict);
+          }
+          
+          
+          const frontJson = {} as Result;
+          frontJson['addr_str'] = addr_str;
+          let totalPnl = 0;
+          for (const item of details) {
+            totalPnl = totalPnl + item['realised_profit'];
+          }
+          frontJson['total_pnl'] = totalPnl;
+          frontJson['details'] = details;
+          
+          return frontJson;
             
         }
         catch (e: any) { 
-            console.log(e.message);
+            console.log(e);
         }
     }
 
 const SinglePnL = () => {
     const {addr} = useParams();
     //console.log(useParams());  <h2 className="text-white">{addr}</h2>
-    const [data, setData] = useState<frontRes | undefined | 'empty'>(undefined);
+    const [data, setData] = useState<Result | undefined>(undefined);
     const [loading, setLoading] = useState(true);
 
     const onClickHandler = (e: { currentTarget: { nextSibling: any; }; }) => {
@@ -329,7 +432,7 @@ const SinglePnL = () => {
 
 
 
-    if(data === 'empty'){
+    if(data.details.length === 0){
       return (
         <div className="vh-100 bg-dark">
             <Container fluid className="py-4 text-center" data-bs-theme="dark">
@@ -346,7 +449,7 @@ const SinglePnL = () => {
         //realised_profit: number; разные Цвета в зависимости от плюса или минуса
         //roi: number;
         // Учтенные биржи -Stonefi
-        console.log(data);
+        //console.log(data);
         visible_addr = data.addr_str.substring(0,4)+"..."+data.addr_str.substring(data.addr_str.length - 5,data.addr_str.length)
         //<a href={"https://tonscan.org/address/"+row.address_friendly} target="_blank" rel="noopener noreferrer"> </a>
         tonscan_link = <a href={"https://tonscan.org/address/"+data.addr_str} target="_blank" rel="noopener noreferrer"> {visible_addr} </a>
@@ -358,15 +461,15 @@ const SinglePnL = () => {
         //</Row> 
         // Token list colSpan={12}
         // collapsible txes https://codepen.io/n3k1t/pen/OJMGgyq
-        tableRows = data.details.map((row: ResItem) => {
-          var txMap = row.txes.map((tx_row: Tx) => {
+        tableRows = data.details.map((row: TokenPNL) => {
+          var txMap = row.txes.map((tx_row: Transaction) => {
             return (
               <tr>
                 <td>{tx_row.type}</td>
                 <td>{tx_row.token.toFixed(2)}</td>
                 <td>{tx_row.TON.toFixed(2)}</td>
-                <td>{tx_row.wallet_tx_timestamp}</td>
-                <td><a style={{ textDecoration: 'none' }} href={tx_row.hash} target="_blank" rel="noopener noreferrer">link</a></td>
+                <td>{getDate(tx_row.swap_timestamp).toUTCString()}</td>
+                <td>{tx_row.exchange_name}</td>
               </tr>
             );
           });
@@ -374,7 +477,7 @@ const SinglePnL = () => {
                 <React.Fragment>
             <OverlayTrigger placement="top" overlay={tooltip}>
               <tr onClick={onClickHandler}>
-                <td><div><Image src={row.token_info.image_url} roundedCircle width={35} height={35} /> {row.token_info.display_name ? row.token_info.display_name : (row.token_info.contract_address.substring(0,4)+"..."+row.token_info.contract_address.substring(row.token_info.contract_address.length - 5,row.token_info.contract_address.length))}</div></td>
+                <td><div><Image src={row.token_info.image_url} roundedCircle width={35} height={35} /> {row.token_info.name ? row.token_info.name : (row.token_info.master_address.substring(0,4)+"..."+row.token_info.master_address.substring(row.token_info.master_address.length - 5,row.token_info.master_address.length))}</div></td>
                 <td style={{color: row.realised_profit > 0 ? "#15a272" : "#e53843"}} >{row.realised_profit.toFixed(2)} TON</td>
                 <td>{row.roi} </td>
                 
@@ -390,8 +493,8 @@ const SinglePnL = () => {
                     <th>Type</th>
                     <th>Quantity</th>
                     <th>TON Amount</th>
-                    <th>Age, utc</th>
-                    <th>Tx</th>
+                    <th>Age</th>
+                    <th>Exchange</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -423,11 +526,11 @@ const SinglePnL = () => {
 
       <Container>
       <Row xs="auto">
-        <Col><h3 className="text-white">Total PnL</h3></Col>
+        <Col><h3 className="text-white">Total PnL </h3></Col>
         <Col>{total_realised_pnl}</Col>
         <Col><h3 className="text-white"> TON</h3></Col>
       </Row> 
-      <p className="text-secondary">Accounted Exchanges: Ston.fi</p>
+      <p className="text-secondary">Accounted Exchanges: Dedust.io and Ston.fi</p>
       <p className="text-secondary">Read about Realised PnL <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a></p>
      
       </Container>

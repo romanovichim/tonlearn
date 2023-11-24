@@ -71,7 +71,6 @@ function Layout() {
             </NavDropdown>
             <NavDropdown title="Explore Jettons" id="collapsible-nav-dropdown2">
               <NavDropdown.Item><Link to="/jetton-dash" style={{ textDecoration: 'none' }}>Jetton Ranking</Link></NavDropdown.Item>
-              <NavDropdown.Item><Link to="/ton-best-traders" style={{ textDecoration: 'none' }}>Top TON Traders</Link></NavDropdown.Item>
             </NavDropdown>
           </Nav>
           
@@ -119,12 +118,12 @@ function Home() {
   <p style={{ fontSize: "30px", fontWeight: "600"  }} className="text-white">TON PnL Analyzer</p>
   <p style={{ fontSize: "25px", fontWeight: "190"  }} className="text-white"> Use our Address Analyzer to quickly visualize the PnL (profit and loss)<br />and Trading History of your wallet address!</p>
   <br /> 
-  <p className="text-secondary">Integrated over StoneFi for now!</p>
+  <p className="text-secondary">Integrated over Dedust.io and Ston.fi for now!</p>
   <Form onSubmit={handleSubmit}>
     <Form.Group>
       <Form.Control style={{width:"50%"}} id="pnl_input" className='mx-auto' placeholder="Example: EQDESqGp5eZH6uMku68uc_q35GC-xwCtqUqWrcWASVP8d6Ke"/>
       <Form.Text className="text-muted">
-            Enter a wallet address in a friendly from. Ex: <span><a href="https://tonlearn.tools/#/pnl/EQDESqGp5eZH6uMku68uc_q35GC-xwCtqUqWrcWASVP8d6Ke" target="_blank" rel="noopener noreferrer">EQDE...d6Ke</a></span> <span><a href="https://tonlearn.tools/#/pnl/EQAxQzpBXpgLaf_wk0sjPkUSmECjCzD3f7U1EAAMqw_v1xEx" target="_blank" rel="noopener noreferrer">EQAx...1xEx</a></span> <span><a href="https://tonlearn.tools/#/pnl/EQD18dhkAGmKGJiWYPlIz0ltokUrE6ysXPzEKgxszxvqsy6R" target="_blank" rel="noopener noreferrer">EQD1...sy6R </a></span>
+          Enter a wallet address in a friendly from. Ex: <span><a href="https://tonlearn.tools/#/pnl/EQDESqGp5eZH6uMku68uc_q35GC-xwCtqUqWrcWASVP8d6Ke" target="_blank" rel="noopener noreferrer">EQDE...d6Ke</a></span> <span><a href="https://tonlearn.tools/#/pnl/EQAkbIA32zna94YX1Oii371zF-CHOPHB8DLIJa1QBcdNNGmq" target="_blank" rel="noopener noreferrer">EQAk...NGmq</a></span> <span><a href="https://tonlearn.tools/#/pnl/EQD18dhkAGmKGJiWYPlIz0ltokUrE6ysXPzEKgxszxvqsy6R" target="_blank" rel="noopener noreferrer">EQD1...sy6R </a></span>
       </Form.Text>
     </Form.Group>
     <br/>
