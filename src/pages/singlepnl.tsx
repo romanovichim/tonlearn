@@ -251,7 +251,7 @@ type Asset = {
     tempSFTx["token_jm"] = row["operation"]["asset1_address"];
   
     tempSFTx["token"] = Math.abs(parseInt(row['operation']['asset1_amount'])) / Math.pow(10, row['asset1_info']['decimals']);
-    tempSFTx["TON"] = Math.abs(parseInt(row['operation']['asset1_amount'])) / Math.pow(10, row['asset1_info']['decimals']);
+    tempSFTx["TON"] = Math.abs(parseInt(row['operation']['asset0_amount'])) / Math.pow(10, row['asset0_info']['decimals']);
     tempSFTx["swap_timestamp"] = Math.floor(new Date(row['operation']['wallet_tx_timestamp']).getTime() / 1000);
     tempSFTx["exchange_name"] = 'ston.fi';
     sfTxesList.push(tempSFTx);
