@@ -115,7 +115,14 @@ type Asset = {
   }
   
 
-
+//creates Stonfi copytrading link  
+function getCopyLink(dealType: string, tokenSymbol: string, tokenAmount: number): string {
+  if (dealType === 'BUY') {
+      return `https://app.ston.fi/swap?ft=TON&tt=${tokenSymbol}&chartVisible=false&ta=${tokenAmount}&referral_address=EQAvmc9oVnOvLFlUAgeNmZNZoKeDg9vTEiAQxNFw-t5mh3m7`;
+  } else {
+      return `https://app.ston.fi/swap?ft=${tokenSymbol}&tt=TON&chartVisible=false&fa=${tokenAmount}&referral_address=EQAvmc9oVnOvLFlUAgeNmZNZoKeDg9vTEiAQxNFw-t5mh3m7`;
+  }
+} 
   
   //async function dedustAssets(): Promise {
   async function dedustAssets(): Promise<Asset[]> {
@@ -437,7 +444,7 @@ const SinglePnL = () => {
         <div className="vh-100 bg-dark">
             <Container fluid className="py-4 text-center" data-bs-theme="dark">
             <h1 style={{ fontSize: "30px", fontWeight: "175"  }} className="text-white">No swap transactions were found for this account, if you are sure otherwise, write in the comments <a href="https://t.me/ton_learn">here</a>.</h1>
-            <p className="text-secondary">At the moment we are only looking for Stonfi</p>
+            <p className="text-secondary">At the moment we are only looking for Stonfi and Dedust</p>
           </Container>
           </div>
       );
@@ -470,6 +477,7 @@ const SinglePnL = () => {
                 <td>{tx_row.TON.toFixed(2)}</td>
                 <td>{getDate(tx_row.swap_timestamp).toUTCString()}</td>
                 <td>{tx_row.exchange_name}</td>
+                <td><a style={{ textDecoration: 'none' }} href={getCopyLink(tx_row.type,row.token_info.symbol,tx_row.token)} target="_blank" rel="noopener noreferrer">Click to copy</a></td>
               </tr>
             );
           });
@@ -495,6 +503,7 @@ const SinglePnL = () => {
                     <th>TON Amount</th>
                     <th>Age</th>
                     <th>Exchange</th>
+                    <th>Copy Trade Link</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -531,7 +540,7 @@ const SinglePnL = () => {
         <Col><h3 className="text-white"> TON</h3></Col>
       </Row> 
       <p className="text-secondary">Accounted Exchanges: Dedust.io and Ston.fi. You can start trading in TON <a style={{ textDecoration: 'none' }} href="https://t.me/xrocket?start=i_tonlearn" target="_blank" rel="noopener noreferrer">here</a></p>
-      <p className="text-secondary">Read about Realised PnL <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a></p>
+      <p className="text-secondary">Read about Realised PnL <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a> Click on Jetton lines below, to expand swaps </p>
      
       </Container>
 
