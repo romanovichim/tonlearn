@@ -530,7 +530,7 @@ const SinglePnL = () => {
         <Col>{total_realised_pnl}</Col>
         <Col><h3 className="text-white"> TON</h3></Col>
       </Row> 
-      <p className="text-secondary">Accounted Exchanges: Dedust.io and Ston.fi</p>
+      <p className="text-secondary">Accounted Exchanges: Dedust.io and Ston.fi. You can start trading in TON <a style={{ textDecoration: 'none' }} href="https://t.me/xrocket?start=i_tonlearn" target="_blank" rel="noopener noreferrer">here</a></p>
       <p className="text-secondary">Read about Realised PnL <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a></p>
      
       </Container>
