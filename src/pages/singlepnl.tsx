@@ -477,7 +477,7 @@ const SinglePnL = () => {
                 <td>{tx_row.TON.toFixed(2)}</td>
                 <td>{getDate(tx_row.swap_timestamp).toUTCString()}</td>
                 <td>{tx_row.exchange_name}</td>
-                <td><a style={{ textDecoration: 'none' }} href={getCopyLink(tx_row.type,row.token_info.symbol,tx_row.token)} target="_blank" rel="noopener noreferrer">Click to copy</a></td>
+                <td><a style={{ textDecoration: 'none' }} href={getCopyLink(tx_row.type,row.token_info.master_address,tx_row.token)} target="_blank" rel="noopener noreferrer">Click to copy</a></td>
               </tr>
             );
           });
