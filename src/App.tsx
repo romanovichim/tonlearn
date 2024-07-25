@@ -1,6 +1,6 @@
 
 import './App.css'
-import { Container, Nav, Navbar, Spinner} from 'react-bootstrap'
+import { Container, Navbar, Spinner} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 //import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { Routes, Route, Outlet, Link } from "react-router-dom";
@@ -65,6 +65,14 @@ function App() {
   )
 }
 
+/*
+      <Navbar.Collapse id="basic-navbar-nav">
+       <Nav.Link><Link to="/pnldextrades" style={{ textDecoration: 'none' }}>Dex Trades PnL</Link></Nav.Link>   
+      </Navbar.Collapse>
+
+*/
+
+
 function Layout() {
   return (
     <div>
@@ -75,9 +83,7 @@ function Layout() {
       <Navbar data-bs-theme="dark" className="bg-body-tertiary">
       <Container>
       <Navbar.Brand href="/">Ton Learn</Navbar.Brand>
-      <Navbar.Collapse id="basic-navbar-nav">
-       <Nav.Link><Link to="/pnldextrades" style={{ textDecoration: 'none' }}>Dex Trades PnL</Link></Nav.Link>   
-      </Navbar.Collapse>
+
       </Container>
  
       <TonConnectButton />
