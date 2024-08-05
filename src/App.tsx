@@ -1,6 +1,6 @@
 
 import './App.css'
-import { Container, Nav, Navbar, Spinner} from 'react-bootstrap'
+import { Container, Nav, Navbar, OverlayTrigger, Spinner, Tooltip} from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css';
 //import 'react-bootstrap-table-next/dist/react-bootstrap-table2.min.css';
 import { Routes, Route, Outlet, Link } from "react-router-dom";
@@ -28,10 +28,10 @@ import PnLDashOne  from './pages/pnl1dashboard'
 
 //Jetton
 import JettonDashboard from './pages/jettondash'
-import { TonConnectButton } from '@tonconnect/ui-react';
+//import { TonConnectButton } from '@tonconnect/ui-react';
 import { useEffect, useState } from 'react';
-import filterFactory, { selectFilter } from 'react-bootstrap-table2-filter';
-import BootstrapTable from 'react-bootstrap-table-next';
+import filterFactory, { selectFilter, textFilter } from 'react-bootstrap-table2-filter';
+import BootstrapTable, { HeaderFormatter } from 'react-bootstrap-table-next';
 
 
 function App() {
@@ -68,7 +68,8 @@ function App() {
 /*
       <Navbar.Collapse id="basic-navbar-nav">
        <Nav.Link><Link to="/pnldextrades" style={{ textDecoration: 'none' }}>Dex Trades PnL</Link></Nav.Link>   
-      </Navbar.Collapse>
+      </Navbar.Collapse> 
+      <Link to="https://partner.bybit.com/b/tonlearn" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>Buy TON with 20$ gift</Link>
 
 */
 
@@ -78,17 +79,21 @@ function Layout() {
     <div>
       {/* A "layout route" is a good place to put markup you want to "/pnldextrades"
           share across all the pages on your site, like navigation. 
-          <Nav.Link><Link to="/nothing-here" style={{ textDecoration: 'none' }}>Nothing Here</Link></Nav.Link>*/}
+          <Nav.Link><Link to="/nothing-here" style={{ textDecoration: 'none' }}>Nothing Here</Link></Nav.Link>
+          <TonConnectButton />*/}
       
       <Navbar data-bs-theme="dark" className="bg-body-tertiary">
       <Container>
       <Navbar.Brand href="/">Ton Learn</Navbar.Brand>
       <Navbar.Collapse id="basic-navbar-nav">
-       <Nav.Link><Link to="/pnldextrades" style={{ textDecoration: 'none' }}>Dex Trades PnL</Link></Nav.Link>   
+      <Nav className="me-auto">
+       <Nav.Link><Link to="/pnldextrades" style={{ textDecoration: 'none' }}>Dex Trades PnL</Link></Nav.Link>
+       <Nav.Link as="a"><a style={{ textDecoration: 'none' }} href="https://partner.bybit.com/b/tonlearn" target="_blank" rel="noopener noreferrer">Buy TON with 20$ gift</a></Nav.Link>   
+      </Nav>
       </Navbar.Collapse>
       </Container>
  
-      <TonConnectButton />
+      
     </Navbar>
 
       {/* An <Outlet> renders whatever child route is currently active,
@@ -206,6 +211,7 @@ lp_fee: number;
 tvl_usd: number;
 apr_24h: number;
 risk: string;
+fake_pair_search: string;
 }
 
 
@@ -335,16 +341,19 @@ try {
 
   // Loop through cleaned pools
   for (const ssPool of cleanedSSPools) {
+    let temp_token0_info = stonfiSearchToken(ssPool.token0_address, responseAssetData['asset_list'])
+    let temp_token1_info = stonfiSearchToken(ssPool.token1_address, responseAssetData['asset_list'])
     const tempSSDict: EnrichedSSPool = {
       pool_address: ssPool.address,
       dex: 'stonfi',
       farm_info: stonfiSearchFarm(ssPool.address, responseFarmData['farm_list']),
-      token0_info: stonfiSearchToken(ssPool.token0_address, responseAssetData['asset_list']),
-      token1_info: stonfiSearchToken(ssPool.token1_address, responseAssetData['asset_list']),
+      token0_info: temp_token0_info,
+      token1_info: temp_token1_info,
       lp_fee: parseInt(ssPool.lp_fee) / 100,  // Assuming lp_fee is a string
       tvl_usd: parseFloat(ssPool.lp_total_supply_usd),  // Assuming lp_total_supply_usd is a string
       apr_24h: parseFloat(ssPool.apy_1d)*100,  // Assuming apy_1d is a string
       risk: riskEval(parseFloat(ssPool.lp_total_supply_usd)),  // Adjust based on risk_eval function
+      fake_pair_search: temp_token0_info?.symbol + "/" + temp_token1_info?.symbol
     };
 
     if (tempSSDict.tvl_usd > 1000 && tempSSDict.token0_info?.community == false && tempSSDict.token1_info?.community == false) {
@@ -765,6 +774,7 @@ try {
         tvl_usd: temp_tvl_usd!,  // Assuming lp_total_supply_usd is a string
         apr_24h: temp_apr_24h!,  // Assuming apy_1d is a string
         risk: temp_risk,  // Adjust based on risk_eval function
+        fake_pair_search: temp_token0_info[0]?.symbol + "/" + temp_token1_info[0]?.symbol
       };
       enrichedDDList.push(tempDDDict);
       //rich_arr.push({nft: "https://tonscan.org/address/"+temp_addr,price: temp_price,time: temp_time,name: temp_name} as OneRich);
@@ -876,7 +886,8 @@ const Home = () => {
           Risk: row.risk,
           APY: Number((row.apr_24h).toFixed(2)),
           TVL: Number(row.tvl_usd.toFixed(2)),
-          Farm: row
+          Farm: row,
+          ForSearch: row.fake_pair_search
         } 
     });
 
@@ -898,6 +909,21 @@ const Home = () => {
       }
   }
 
+  const tvlTooltip = (
+    <Tooltip id="tooltip">
+       TVL represents the amount of assets deposited by the liquidity providers in the pool in USD
+    </Tooltip>
+  );
+
+
+  const tvlFormatter: HeaderFormatter<EnrichedSSPool> = (column, _colIndex, components) => {
+    return (
+      <OverlayTrigger placement="top" overlay={tvlTooltip}>
+     <h5>{ column.text } &#9432; {components.sortElement}</h5>
+      </OverlayTrigger>
+    );
+}
+
   //Filters
 
   const selectOptionsRisk: { [index: string]: string } = {
@@ -905,9 +931,23 @@ const Home = () => {
       "MEDIUM RISK": "MEDIUM RISK",
       "HIGH RISK": "HIGH RISK"
   };
-  
-    
+  /*
+  function setInputValueById(id: string, value: string): void {
+    // Get the input element by ID
+    const inputElement = document.getElementById(id) as HTMLInputElement;
 
+    // Check if the element exists and is an input element
+    if (inputElement) {
+        // Set the value of the input element
+        inputElement.value = value;
+    } else {
+        console.error(`Element with ID ${id} not found.`);
+    }
+  }
+  */
+  //const handleClick = (_event: React.MouseEvent<HTMLButtonElement>): void => {
+  //  setInputValueById('text-filter-column-ForSearch', 'Hello, TypeScript!');
+  //};
   // columns
   const columns = [{
       dataField: 'index',
@@ -942,14 +982,23 @@ const Home = () => {
     }, {
       dataField: 'TVL',
       text: 'TVL, USD',
-      sort: true
+      sort: true,
+      headerFormatter: tvlFormatter
     }, {
       dataField: 'Farm',
       text: 'Farm Info',
       formatter: farmFormatter
+    },
+    {
+      dataField: 'ForSearch',
+      text: 'Fake Search',
+      filter: textFilter(),
+      hidden: true
     }
     
   ];
+
+
 
   return (
     <div className="bg-dark">
@@ -958,7 +1007,7 @@ const Home = () => {
     <p className="text-secondary">Make smarter crypto investing decisions with our pool data.</p>
     <p className="text-secondary">How to use this page: <a style={{ textDecoration: 'none' }} href="https://t.me/ton_learn/" target="_blank" rel="noopener noreferrer">here</a></p>
 
-      <BootstrapTable bootstrap4 keyField='index' data={ tableData } columns={ columns }  filter={ filterFactory() }  striped bordered hover classes='table-dark'/>
+  <BootstrapTable bootstrap4 keyField='index' data={ tableData } columns={ columns }  filter={ filterFactory() }  striped bordered hover classes='table-dark'/>
   
     </Container>
     </div>
@@ -966,9 +1015,10 @@ const Home = () => {
 
   }
 
+  //<button className="btn btn-lg btn-primary" onClick={ handleClick }> filter columns by USDT </button>
 //classes='table-dark'
 // https://github.com/NovatecConsulting/novatec-service-dependency-graph-panel/blob/279814dd6efcac7238aad79fc637e31dc3f00915/src/panel/statistics/SortableTable.tsx#L36
-
+// <input delay="500" type="text" id="text-filter-column-ForSearch" class="filter text-filter form-control undefined" placeholder="Enter Fake Search..." value="">
 /*
 <Row>
 <Col>
